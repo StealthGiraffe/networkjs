@@ -1,14 +1,12 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Stability Monitor StabilityMonitor constructor initializes with the correct props 1`] = `
+exports[`Stability Monitor monitor constructor init with the correct props and calls initialize method 1`] = `
 StabilityMonitor {
-  "consecutiveSlowRequestCount": 0,
   "durationThreshold": 2,
   "emitter": EventEmitter {
     "events": Object {},
   },
   "interval": 5000,
-  "paused": false,
   "requestThreshold": 2000,
   "resource": "URL",
 }

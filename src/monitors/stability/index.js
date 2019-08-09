@@ -1,17 +1,13 @@
 import { NetworkStatus } from '../../constants'
 import { StabilityDefaults } from './Stability.constants'
 
-export const delay = async interval => {
-    return await new Promise(done => setTimeout(() => done(), interval))
-}
-
 export const ping = async resource => {
     try {
-        await fetch(resource)
+        const res = await fetch(resource)
+        return res.status === 200
     } catch (e) {
         return false
     }
-    return true
 }
 
 class StabilityMonitor {
@@ -33,14 +29,23 @@ class StabilityMonitor {
         this.initialize()
     }
 
+    clearCurrentInterval() {
+        if (this.runInterval) {
+            clearInterval(this.runInterval)
+            this.runInterval = null
+        }
+    }
+
     initialize() {
         this.consecutiveSlowRequestCount = 0
         this.paused = false
-        this.run()
+        this.clearCurrentInterval()
+        this.runInterval = setInterval(this.run.bind(this), this.interval)
     }
 
     pause() {
         this.paused = true
+        this.clearCurrentInterval()
     }
 
     resume() {
@@ -48,15 +53,13 @@ class StabilityMonitor {
     }
 
     async run() {
-        let shouldDelay = true
+        if (this.paused) return
+
         const start = window.performance.now()
-        const success = await ping(this.resource)
-        if (success) {
+        if (await ping(this.resource)) {
             if (window.performance.now() - start > this.durationThreshold) {
                 this.consecutiveSlowRequestCount++
-                if (this.consecutiveSlowRequestCount < this.requestThreshold) {
-                    shouldDelay = false
-                } else if (
+                if (
                     this.consecutiveSlowRequestCount ===
                         this.requestThreshold &&
                     !this.paused
@@ -73,8 +76,6 @@ class StabilityMonitor {
                 this.consecutiveSlowRequestCount = 0
             }
         }
-        shouldDelay && (await delay(this.interval))
-        !this.paused && (await this.run())
     }
 }
 
