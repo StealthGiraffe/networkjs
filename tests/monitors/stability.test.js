@@ -120,73 +120,30 @@ describe('Stability Monitor', () => {
             })
         })
 
-        //     describe.only('run', () => {
-        //         beforeEach(() => {
-        //             jest.restoreAllMocks()
-        //         })
+        describe('run', () => {
+            it('returns if monitor paused', async () => {
+                const pingSpy = jest
+                    .spyOn(stability, 'ping')
+                    .mockImplementation(() => false)
 
-        //         it.only('returns if monitor paused', async () => {
-        //             const pingSpy = jest.fn(() => false)
-        //             jest.doMock('../../src/monitors/stability', () => ({
-        //                 ...jest.requireActual('../../src/monitors/stability'),
-        //                 ping: pingSpy,
-        //             }))
-        //             monitor.pause()
-        //             await monitor.run()
+                const monitor = createMonitor()
+                monitor.pause()
+                await monitor.run()
 
-        //             expect(pingSpy).not.toHaveBeenCalled()
-        //         })
+                expect(pingSpy).not.toHaveBeenCalled()
+            })
 
-        //         it.only('pings the provided resource', async () => {
-        //             console.log(JSON.stringify(stability.ping))
-        //             const pingSpy = jest.fn(() => false)
-        //             jest.doMock('../../src/monitors/stability', () => ({
-        //                 ...jest.requireActual('../../src/monitors/stability'),
-        //                 ping: pingSpy,
-        //             }))
-        //             console.log(JSON.stringify(stability.ping))
-        //             await monitor.run()
+            it('pings the provided resource', async () => {
+                const pingSpy = jest
+                    .spyOn(stability, 'ping')
+                    .mockImplementation(() => false)
 
-        //             expect(pingSpy).toHaveBeenCalledTimes(1)
-        //             expect(pingSpy).toHaveBeenLastCalledWith('URL')
-        //         })
-        //     })
+                const monitor = createMonitor()
+                await monitor.run()
+
+                expect(pingSpy).toHaveBeenCalledTimes(1)
+                expect(pingSpy).toHaveBeenLastCalledWith('URL')
+            })
+        })
     })
 })
-
-/*
-class StabilityMonitor {
-
-    async run() {
-        let shouldDelay = true
-        const start = window.performance.now()
-        const success = await ping(this.resource)
-        if (success) {
-            if (window.performance.now() - start > this.durationThreshold) {
-                this.consecutiveSlowRequestCount++
-                if (this.consecutiveSlowRequestCount < this.requestThreshold) {
-                    shouldDelay = false
-                } else if (
-                    this.consecutiveSlowRequestCount ===
-                        this.requestThreshold &&
-                    !this.paused
-                ) {
-                    this.emitter.dispatchEvent(NetworkStatus.UNSTABLE)
-                }
-            } else {
-                if (
-                    this.consecutiveSlowRequestCount >= this.requestThreshold &&
-                    !this.paused
-                ) {
-                    this.emitter.dispatchEvent(NetworkStatus.STABLE)
-                }
-                this.consecutiveSlowRequestCount = 0
-            }
-        }
-        shouldDelay && (await delay(this.interval))
-        !this.paused && (await this.run())
-    }
-}
-
-export default StabilityMonitor
-*/
